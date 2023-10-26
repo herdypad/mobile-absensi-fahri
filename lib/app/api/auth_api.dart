@@ -44,20 +44,28 @@ class AuthApi {
     required String username,
     required String password,
     required String name,
+    required String nip,
   }) async {
     try {
-      const url = 'api/login';
+      const url = 'api/register';
 
       final response = await ApiService().request(
         url: url,
         method: Method.POST,
-        parameters: {"email": username, "password": password, "name": name},
+        parameters: {
+          "email": username,
+          "password": password,
+          "name": name,
+          "jabatan": 'dosen',
+          "nip": nip,
+        },
         isToken: false,
       );
       logSys(response.toString());
 
       return response;
     } catch (e) {
+      logSys(e.toString());
       rethrow;
     }
   }

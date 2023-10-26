@@ -72,6 +72,43 @@ class RegisterView extends GetView<RegisterController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
+                      'NIP',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
+                    TextFormField(
+                      controller: controller.nipController,
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4.0)),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4.0)),
+                          hintText: 'Masukan NIP'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'NIP tidak boleh kosong';
+                        } else if (value.length < 3) {
+                          return 'NIP harus terdiri dari minimal 3 huruf';
+                        } else if (value.length > 50) {
+                          return 'NIP harus terdiri dari maksimal 50 huruf';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
                       'email',
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
@@ -162,7 +199,9 @@ class RegisterView extends GetView<RegisterController> {
                       backgroundColor:
                           MaterialStateProperty.all<Color>(Colors.orange),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      controller.register();
+                    },
                     child: const Text(
                       'Registrasi',
                       style: TextStyle(

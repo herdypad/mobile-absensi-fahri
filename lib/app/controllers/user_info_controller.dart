@@ -28,11 +28,15 @@ class UserInfoController extends GetxController {
       return;
     }
 
-    final respon = await AuthApi.login(username: user, password: passUser);
-    dataUser(UserM.fromJson(respon));
-    if (respon['message'] == 'Login success') {
-      Get.offNamed(Routes.HOME, arguments: dataUser.value);
-    } else {
+    try {
+      final respon = await AuthApi.login(username: user, password: passUser);
+      dataUser(UserM.fromJson(respon));
+      if (respon['message'] == 'Login success') {
+        Get.offNamed(Routes.HOME, arguments: dataUser.value);
+      } else {
+        Get.offNamed(Routes.LOGIN);
+      }
+    } catch (e) {
       Get.offNamed(Routes.LOGIN);
     }
   }

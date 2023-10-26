@@ -10,12 +10,14 @@ String userMToJson(UserM data) => json.encode(data.toJson());
 
 class UserM {
   String? message;
+  Location? location;
   String? accessToken;
   String? tokenType;
   User? user;
 
   UserM({
     this.message,
+    this.location,
     this.accessToken,
     this.tokenType,
     this.user,
@@ -23,6 +25,9 @@ class UserM {
 
   factory UserM.fromJson(Map<String, dynamic> json) => UserM(
         message: json["message"],
+        location: json["location"] == null
+            ? null
+            : Location.fromJson(json["location"]),
         accessToken: json["access_token"],
         tokenType: json["token_type"],
         user: json["user"] == null ? null : User.fromJson(json["user"]),
@@ -30,9 +35,30 @@ class UserM {
 
   Map<String, dynamic> toJson() => {
         "message": message,
+        "location": location?.toJson(),
         "access_token": accessToken,
         "token_type": tokenType,
         "user": user?.toJson(),
+      };
+}
+
+class Location {
+  String? lat;
+  String? long;
+
+  Location({
+    this.lat,
+    this.long,
+  });
+
+  factory Location.fromJson(Map<String, dynamic> json) => Location(
+        lat: json["lat"],
+        long: json["long"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "lat": lat,
+        "long": long,
       };
 }
 

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../service/api_service.dart';
+import '../../utils/app_utils.dart';
 
 class PresensiApi {
   static Future<Map<String, dynamic>> riwayat(String id) async {
@@ -27,7 +28,7 @@ class PresensiApi {
         method: Method.GET,
         isToken: true,
       );
-      // logSys(response.toString());
+      logSys(response.toString());
 
       return response;
     } catch (e) {

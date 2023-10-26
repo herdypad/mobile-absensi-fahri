@@ -20,12 +20,14 @@ dependencies:
   lottie: ^2.4.0
   http: ^0.13.3
   http_parser: ^4.0.2
+  geolocator: ^10.1.0
   
   get: 4.6.6
   flutter: 
     sdk: flutter
   get_storage: ^2.1.1
   dio: ^5.3.3
+  permission_handler: ^11.0.1
 
 dev_dependencies: 
   flutter_lints: ^2.0.0

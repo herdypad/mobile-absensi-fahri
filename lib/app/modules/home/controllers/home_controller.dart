@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-import 'package:absen_dosen_mobile/app/api/auth_api.dart';
 import 'package:absen_dosen_mobile/app/api/presensi_api.dart';
 import 'package:absen_dosen_mobile/app/api/service_upload.dart';
 import 'package:absen_dosen_mobile/app/data/data_absensi.dart';
 import 'package:absen_dosen_mobile/utils/app_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../constants/constant.dart';
 import '../../../../utils/app_storage.dart';
@@ -20,8 +21,22 @@ class HomeController extends GetxController {
   RxList<DataAbsensiM> dataAbsenToday = <DataAbsensiM>[].obs;
 
   RxBool isLoading = false.obs;
+
   RxBool isRadius = false.obs;
+  RxBool isAbsenMasuk = false.obs;
   RxString fileName = ''.obs;
+
+  RxBool isLoadingRadius = false.obs;
+
+  //lokasi hp
+  RxDouble lat1 = 0.0.obs;
+  RxDouble long1 = 0.0.obs;
+
+  //lokasi kampus
+  RxDouble lat2 = 0.0.obs;
+  RxDouble long2 = 0.0.obs;
+
+  RxDouble distance = 0.0.obs;
 
   Future<void> initData() async {
     isLoading(true);
@@ -46,7 +61,8 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     initData();
-    getData();
+    getData(true);
+    cekLokasi();
   }
 
   @override
@@ -54,8 +70,16 @@ class HomeController extends GetxController {
     super.onReady();
   }
 
-  Future<void> getData() async {
-    isLoading(true);
+  Future<void> cekLokasi() async {
+    lat2(double.parse(dataUser.value.location!.lat.toString()));
+    long2(double.parse(dataUser.value.location!.long.toString()));
+    getLocation();
+  }
+
+  Future<void> getData(bool status) async {
+    if (status) {
+      isLoading(true);
+    }
 
     //riwayat presensi
     final respon =
@@ -69,7 +93,14 @@ class HomeController extends GetxController {
         await PresensiApi.riwayatToday(dataUser.value.user!.id.toString());
     final b = respon2['data'];
     logSys(respon['message']);
-    dataAbsenToday(List.from(a.map((e) => DataAbsensiM.fromJson(e))));
+    dataAbsenToday(List.from(b.map((e) => DataAbsensiM.fromJson(e))));
+    try {
+      if (dataAbsenToday.value[0].jamMasuk!.isNotEmpty) {
+        isAbsenMasuk(true);
+      }
+    } catch (e) {
+      isAbsenMasuk(false);
+    }
 
     isLoading(false);
   }
@@ -80,20 +111,23 @@ class HomeController extends GetxController {
     );
   }
 
-  Future<bool> clockin() async {
+  Future<bool> clockin(file) async {
     final picker = ImagePicker();
-    final file =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+    // final file =
+    //     await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+
     if (file != null) {
       cekFoto('Proses Verifikasi Wajah');
-      final data = await ServiceUpload()
-          .uploadFileAbsen(filex: file.path, id: '2', url: 'api/clockin');
+      final data = await ServiceUpload().uploadFileAbsen(
+          filex: file.path,
+          id: dataUser.value.user!.id.toString(),
+          url: 'api/clockin');
 
       final a = jsonDecode(data);
       Get.back();
       showPopUpInfo(
           success: true, title: 'Berhasil', description: '${a['message']}');
-      getData();
+      getData(false);
 
       return true;
     }
@@ -127,27 +161,84 @@ class HomeController extends GetxController {
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 24),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
         child: Container(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 4),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12), color: Colors.white),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 3),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 3),
               Text(
                 description ?? '',
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 3),
-              SizedBox(height: 20),
+              const SizedBox(height: 3),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
       barrierDismissible: false,
     );
+  }
+
+  Future<void> getLocation() async {
+    PermissionStatus status = await Permission.location.request();
+
+    if (status.isDenied) {
+      if (await Permission.location.isPermanentlyDenied) {
+        openAppSettings();
+      } else {
+        PermissionStatus secondStatus = await Permission.location.request();
+        if (secondStatus.isGranted) {
+          // Izin diberikan
+        }
+      }
+    }
+
+    isLoadingRadius(true);
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: Duration(milliseconds: 15000));
+
+      lat1(position.latitude);
+      long1(position.longitude);
+      logSysT("TAG", "Latitude1: ${lat1.value}, Longitude: ${long1.value}");
+      logSysT("TAG", "Latitude2: ${lat2.value}, Longitude: ${long2.value}");
+
+      isLoadingRadius(false);
+    } catch (e) {
+      logSysT("TAG", "cek Lokasi done $e");
+      isLoadingRadius(false);
+    }
+
+    calculateDistance();
+  }
+
+  void calculateDistance() {
+    if (lat1 != 0.0 && lat2 != 0.0) {
+      double meters = Geolocator.distanceBetween(
+        lat1.value,
+        long1.value,
+        lat2.value,
+        long2.value,
+      );
+
+      distance(meters);
+
+      if (meters < 500) {
+        isRadius(true);
+      } else {
+        isRadius(false);
+      }
+
+      logSys("Jarak dari titik sekarang sampai dengan office :" +
+          meters.toString() +
+          " meters");
+    }
   }
 }
