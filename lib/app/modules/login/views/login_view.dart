@@ -25,6 +25,7 @@ class LoginView extends GetView<LoginController> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               children: [
+                controller.isLoading.isFalse ? Container() : Container(),
                 Image(
                   image: const AssetImage("assets/logo.png"),
                   height: 250,
@@ -35,7 +36,7 @@ class LoginView extends GetView<LoginController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Email',
                       ),
                       const SizedBox(

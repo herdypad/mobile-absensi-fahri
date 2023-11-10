@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:absen_dosen_mobile/app/api/presensi_api.dart';
 import 'package:absen_dosen_mobile/app/api/service_upload.dart';
@@ -13,7 +14,12 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../constants/constant.dart';
 import '../../../../utils/app_storage.dart';
 import '../../../../widget/show_dialog.dart';
+import '../../../api/auth_api.dart';
 import '../../../data/user_m.dart';
+
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class HomeController extends GetxController {
   Rx<UserM> dataUser = UserM().obs;
@@ -27,6 +33,8 @@ class HomeController extends GetxController {
   RxString fileName = ''.obs;
 
   RxBool isLoadingRadius = false.obs;
+
+  RxString filePathProfile = "".obs;
 
   //lokasi hp
   RxDouble lat1 = 0.0.obs;
@@ -58,16 +66,33 @@ class HomeController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     initData();
     getData(true);
     cekLokasi();
+    getFileProfilePath();
+
+    // await Permission.location.isRestricted;
+    // await Permission.mediaLibrary;
+    // await Permission.accessMediaLocation;
   }
 
   @override
   void onReady() {
     super.onReady();
+  }
+
+  Future<void> getFileProfilePath() async {
+    final response = await http
+        .get(Uri.parse("${BASE_URL}api/file/${dataUser.value.user?.foto}"));
+    final bytes = response.bodyBytes;
+    // Menyimpan gambar ke file sementara
+    final tempDir = await getTemporaryDirectory();
+    final file = File("${tempDir.path}/temp_image.jpg");
+    await file.writeAsBytes(bytes);
+
+    filePathProfile(file.path);
   }
 
   Future<void> cekLokasi() async {
@@ -112,6 +137,11 @@ class HomeController extends GetxController {
   }
 
   Future<bool> clockin(file) async {
+    final data = await Permission.camera.request();
+    if (data.isDenied) {
+      return false;
+    }
+
     final picker = ImagePicker();
     // final file =
     //     await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
@@ -137,15 +167,22 @@ class HomeController extends GetxController {
   Future<bool> updateFoto() async {
     final picker = ImagePicker();
     final file =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 30);
     if (file != null) {
       cekFoto('Update Profile');
-      final data = await ServiceUpload()
-          .uploadFileAbsen(filex: file.path, id: '2', url: 'api/updatefoto');
+      final data = await ServiceUpload().uploadFileAbsen(
+          filex: file.path,
+          id: '${dataUser.value.user!.id}',
+          url: 'api/updatefoto');
 
       final a = jsonDecode(data);
 
       Get.back();
+
+      final respon = await AuthApi.whoiam();
+      dataUser(UserM.fromJson(respon));
+
+      getFileProfilePath();
 
       showPopUpInfo(
           success: true, title: 'Berhasil', description: '${a['message']}');
@@ -203,7 +240,7 @@ class HomeController extends GetxController {
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
-          timeLimit: Duration(milliseconds: 15000));
+          timeLimit: const Duration(milliseconds: 15000));
 
       lat1(position.latitude);
       long1(position.longitude);
@@ -236,9 +273,7 @@ class HomeController extends GetxController {
         isRadius(false);
       }
 
-      logSys("Jarak dari titik sekarang sampai dengan office :" +
-          meters.toString() +
-          " meters");
+      logSys("Jarak dari titik sekarang sampai dengan office :$meters meters");
     }
   }
 }

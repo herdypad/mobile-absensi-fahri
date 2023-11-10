@@ -1,6 +1,7 @@
 import 'package:absen_dosen_mobile/app/data/user_m.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../constants/constant.dart';
 import '../../../../utils/app_storage.dart';
@@ -22,6 +23,16 @@ class LoginController extends GetxController {
   RxBool isLoading = false.obs;
 
   Rx<UserM> dataUser = UserM().obs;
+
+  @override
+  void onInit() async {
+    super.onInit();
+
+    await Permission.camera.request();
+
+    // await Permission.mediaLibrary;
+    // await Permission.accessMediaLocation;
+  }
 
   Future<void> login() async {
     try {
@@ -50,7 +61,7 @@ class LoginController extends GetxController {
         await Future.delayed(const Duration(seconds: 2));
         showToast(message: "Berhasil Login");
         isLoading(false);
-        Get.offNamed(Routes.HOME, arguments: dataUser.value);
+        Get.offAllNamed(Routes.HOME, arguments: dataUser.value);
       }
     } catch (e) {
       isLoading(false);

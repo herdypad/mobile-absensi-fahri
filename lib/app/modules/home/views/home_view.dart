@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../widget/show_dialog.dart';
 import '../controllers/home_controller.dart';
@@ -14,6 +15,30 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
+          appBar: AppBar(
+            shadowColor: Colors.grey[10],
+            backgroundColor: Colors.orange,
+            title: const Text('Absensi Dosen'),
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  await controller.logOut();
+                  Get.offNamed(Routes.LOGIN);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.red,
+                      content: Text('Berhasil Logout'),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
           body: RefreshIndicator(
             onRefresh: () async {
               controller.cekLokasi();
@@ -23,42 +48,7 @@ class HomeView extends GetView<HomeController> {
               CustomScrollView(
                 slivers: [
                   // Notifikasi, Text Absensi Dosen, dan LogOut
-                  SliverAppBar(
-                    systemOverlayStyle: const SystemUiOverlayStyle(
-                      statusBarColor: Colors.orange,
-                      statusBarIconBrightness: Brightness.light,
-                    ),
-                    elevation: 0,
-                    backgroundColor: Colors.orange,
-                    centerTitle: true,
-                    title: const Text(
-                      'Absensi Dosen',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    actions: [
-                      IconButton(
-                        onPressed: () async {
-                          await controller.logOut();
-                          Get.offNamed(Routes.LOGIN);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.red,
-                              content: Text('Berhasil Logout'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
+
                   SliverToBoxAdapter(
                     child: controller.isLoading.isFalse
                         ? SingleChildScrollView(
@@ -90,25 +80,32 @@ class HomeView extends GetView<HomeController> {
                                                 child: Column(
                                                   children: [
                                                     Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
                                                       children: [
                                                         GestureDetector(
-                                                          onTap: () {
-                                                            controller
-                                                                .updateFoto();
-                                                          },
-                                                          child: Container(
-                                                            height: 60.0,
-                                                            width: 60.0,
-                                                            decoration: BoxDecoration(
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                image: DecorationImage(
-                                                                    image: NetworkImage(
-                                                                        "${BASE_URL}api/file/${controller.dataUser.value.user?.foto}"),
-                                                                    fit: BoxFit
-                                                                        .cover)),
-                                                          ),
-                                                        ),
+                                                            onTap: () {
+                                                              controller
+                                                                  .updateFoto();
+                                                            },
+                                                            child: Obx(
+                                                              () => Container(
+                                                                height: 60.0,
+                                                                width: 60.0,
+                                                                decoration: BoxDecoration(
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                    image: DecorationImage(
+                                                                        image: NetworkImage(
+                                                                            "${BASE_URL}api/file/${controller.dataUser.value.user?.foto}"),
+                                                                        fit: BoxFit
+                                                                            .cover)),
+                                                              ),
+                                                            )),
                                                         const SizedBox(
                                                           width: 10.0,
                                                         ),
@@ -203,7 +200,7 @@ class HomeView extends GetView<HomeController> {
                                                     ),
                                                     const SizedBox(height: 7),
                                                     Text(
-                                                        "jarak anda ${controller.distance.value}"),
+                                                        "jarak anda ${controller.distance.value.toString().length > 8 ? controller.distance.value.toString().substring(0, 8) : controller.distance.value.toString()}"),
                                                     controller.isLoadingRadius
                                                             .isFalse
                                                         ? controller.isRadius
@@ -389,7 +386,19 @@ class HomeView extends GetView<HomeController> {
                                                           ],
                                                         ),
                                                         child: ElevatedButton(
-                                                          onPressed: () {
+                                                          onPressed: () async {
+                                                            PermissionStatus
+                                                                status2 =
+                                                                await Permission
+                                                                    .audio
+                                                                    .request();
+
+                                                            if (status2
+                                                                .isGranted) {
+                                                              openAppSettings();
+                                                              return;
+                                                            }
+
                                                             Navigator.push(
                                                               context,
                                                               MaterialPageRoute(
@@ -441,6 +450,9 @@ class HomeView extends GetView<HomeController> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 20),
+                                const Text("Riwayat Presensi"),
+                                const SizedBox(height: 5),
                                 Column(
                                   children: [
                                     ListView.builder(
