@@ -167,7 +167,7 @@ class HomeController extends GetxController {
   Future<bool> updateFoto() async {
     final picker = ImagePicker();
     final file =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 30);
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 30);
     if (file != null) {
       cekFoto('Update Profile');
       final data = await ServiceUpload().uploadFileAbsen(

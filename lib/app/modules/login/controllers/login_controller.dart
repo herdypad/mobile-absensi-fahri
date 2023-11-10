@@ -11,11 +11,11 @@ import '../../../api/auth_api.dart';
 import '../../../routes/app_pages.dart';
 
 class LoginController extends GetxController {
-  final cUsername = TextEditingController(text: "user@user.com");
+  final cUsername = TextEditingController(text: "");
   RxString username = ''.obs;
   bool isValidusername = false;
 
-  final cPassword = TextEditingController(text: "123456");
+  final cPassword = TextEditingController(text: "");
   RxString password = ''.obs;
 
   RxBool passwordVisible = true.obs;
