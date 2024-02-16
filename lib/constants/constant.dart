@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-const String BASE_URL = 'http://47.245.93.44/admin/public/';
+const String BASE_URL = 'http://47.245.93.44/';
 const String BASE_URL_FR = 'http://47.245.127.235/';
 const String CACHE_ACCESS_TOKEN = 'access_token';
 const String CACHE_ACCESS_USERNAME = 'access_username';

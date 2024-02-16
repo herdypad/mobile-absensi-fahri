@@ -46,6 +46,7 @@ class CaptureController extends GetxController {
         cameraController = CameraController(
           camera,
           ResolutionPreset.medium,
+          enableAudio: false,
         );
         await cameraController?.initialize();
         cameraFound = true;

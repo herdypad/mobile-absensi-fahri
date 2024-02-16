@@ -22,9 +22,8 @@ class HomeView extends GetView<HomeController> {
             actions: [
               IconButton(
                 onPressed: () async {
-                  controller.cekFotoNotEmty();
-                  // await controller.logOut();
-                  // Get.offNamed(Routes.LOGIN);
+                  await controller.logOut();
+                  Get.offNamed(Routes.LOGIN);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       behavior: SnackBarBehavior.floating,
@@ -200,8 +199,14 @@ class HomeView extends GetView<HomeController> {
                                                       ),
                                                     ),
                                                     const SizedBox(height: 7),
-                                                    Text(
-                                                        "jarak anda ${controller.distance.value.toString().length > 8 ? controller.distance.value.toString().substring(0, 8) : controller.distance.value.toString()}"),
+                                                    //alamat
+                                                    Text("Lokasi Anda"),
+                                                    SingleChildScrollView(
+                                                      controller:
+                                                          ScrollController(),
+                                                      child: Text(
+                                                          "${controller.adressUser.value.toString().length > 50 ? controller.adressUser.value.toString().substring(0, 50) : controller.adressUser.value.toString()}"),
+                                                    ),
                                                     controller.isLoadingRadius
                                                             .isFalse
                                                         ? controller.isRadius

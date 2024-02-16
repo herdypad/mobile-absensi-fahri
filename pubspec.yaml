@@ -29,6 +29,7 @@ dependencies:
   get_storage: ^2.1.1
   dio: ^5.3.3
   permission_handler: ^11.0.1
+  geocoding: ^2.1.1
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -6,6 +6,7 @@ import 'package:absen_dosen_mobile/app/api/service_upload.dart';
 import 'package:absen_dosen_mobile/app/data/data_absensi.dart';
 import 'package:absen_dosen_mobile/utils/app_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,6 +46,9 @@ class HomeController extends GetxController {
   RxDouble long2 = 0.0.obs;
 
   RxDouble distance = 0.0.obs;
+
+  //adress
+  RxString adressUser = "".obs;
 
   Future<void> initData() async {
     isLoading(true);
@@ -256,15 +260,40 @@ class HomeController extends GetxController {
     }
 
     isLoadingRadius(true);
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-          timeLimit: const Duration(milliseconds: 15000));
 
-      lat1(position.latitude);
-      long1(position.longitude);
-      logSysT("TAG", "Latitude1: ${lat1.value}, Longitude: ${long1.value}");
-      logSysT("TAG", "Latitude2: ${lat2.value}, Longitude: ${long2.value}");
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(milliseconds: 15000));
+
+    lat1(position.latitude);
+    long1(position.longitude);
+    logSysT("TAG", "Latitude1: ${lat1.value}, Longitude: ${long1.value}");
+    logSysT("TAG", "Latitude2: ${lat2.value}, Longitude: ${long2.value}");
+
+    try {
+      await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high,
+              timeLimit: Duration(milliseconds: 15000))
+          .then((position) {
+        lat1(position.latitude);
+        long1(position.longitude);
+        placemarkFromCoordinates(position.latitude, position.longitude)
+            .then((placemarks) {
+          // ignore: prefer_interpolation_to_compose_strings
+          String alamatLengkap = placemarks[0].name! +
+              ',' +
+              placemarks[0].street! +
+              ',' +
+              placemarks[0].locality! +
+              ',' +
+              placemarks[0].subAdministrativeArea! +
+              ',' +
+              placemarks[0].administrativeArea!;
+
+          logSysT("TAG1", alamatLengkap);
+          adressUser(alamatLengkap);
+        });
+      });
 
       isLoadingRadius(false);
     } catch (e) {
