@@ -83,9 +83,25 @@ class HomeController extends GetxController {
     super.onReady();
   }
 
+  Future<void> cekFotoNotEmty() async {
+    showPopUpInfo(
+        onPress: () {
+          updateFoto();
+        },
+        success: false,
+        title: 'Berhasil',
+        description:
+            'Anda Belum Melakukan Foto Profile, Silahkan Update Profile');
+  }
+
   Future<void> getFileProfilePath() async {
     final response = await http
         .get(Uri.parse("${BASE_URL}api/file/${dataUser.value.user?.foto}"));
+
+    if (response.statusCode != 200) {
+      cekFotoNotEmty();
+      // return;
+    }
     final bytes = response.bodyBytes;
     // Menyimpan gambar ke file sementara
     final tempDir = await getTemporaryDirectory();
@@ -175,8 +191,11 @@ class HomeController extends GetxController {
           id: '${dataUser.value.user!.id}',
           url: 'api/updatefoto');
 
-      final a = jsonDecode(data);
+      // final a = jsonDecode(data);
 
+      Get.back();
+
+      //dan menutu semua pop up
       Get.back();
 
       final respon = await AuthApi.whoiam();
@@ -184,8 +203,8 @@ class HomeController extends GetxController {
 
       getFileProfilePath();
 
-      showPopUpInfo(
-          success: true, title: 'Berhasil', description: '${a['message']}');
+      // showPopUpInfo(
+      //     success: true, title: 'Berhasil', description: '${a['message']}');
 
       return true;
     }

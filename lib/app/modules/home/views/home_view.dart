@@ -22,8 +22,9 @@ class HomeView extends GetView<HomeController> {
             actions: [
               IconButton(
                 onPressed: () async {
-                  await controller.logOut();
-                  Get.offNamed(Routes.LOGIN);
+                  controller.cekFotoNotEmty();
+                  // await controller.logOut();
+                  // Get.offNamed(Routes.LOGIN);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       behavior: SnackBarBehavior.floating,
@@ -254,7 +255,7 @@ class HomeView extends GetView<HomeController> {
                                             children: [
                                               // Absen Masuk
                                               Container(
-                                                height: 170,
+                                                height: 130,
                                                 width: 165,
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
@@ -349,7 +350,7 @@ class HomeView extends GetView<HomeController> {
 
                                               // Absen Keluar
                                               Container(
-                                                height: 170,
+                                                height: 130,
                                                 width: 165,
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,

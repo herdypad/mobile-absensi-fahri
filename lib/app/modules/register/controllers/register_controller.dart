@@ -42,13 +42,13 @@ class RegisterController extends GetxController {
         nip: nicknameController.text,
         name: nicknameController.text);
     logSys(respon.toString());
-    showToast(message: 'Berhasil Membuat User');
 
     if (respon['message'] == 'success') {
+      showToast(message: 'Berhasil Membuat ser');
       await Future.delayed(const Duration(seconds: 2));
       Get.offNamed(Routes.LOGIN);
     } else {
-      showToast(message: respon['email'][0]);
+      showToast(message: respon.toString());
     }
   }
 }

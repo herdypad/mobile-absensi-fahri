@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:absen_dosen_mobile/app/api/service_fr.dart';
 import 'package:absen_dosen_mobile/app/modules/home/controllers/home_controller.dart';
+import 'package:absen_dosen_mobile/constants/constant.dart';
 import 'package:absen_dosen_mobile/utils/app_utils.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,7 @@ class CaptureController extends GetxController {
         final data = await ServiceFr().cekFace(
             filex: result2!.path,
             filex2: result!.path,
-            url: 'http://8.215.27.241/face_match');
+            url: '${BASE_URL_FR}face_match');
 
         logSysT(data.toString(), "cococot");
 
