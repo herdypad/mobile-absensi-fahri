@@ -280,9 +280,7 @@ class HomeController extends GetxController {
         placemarkFromCoordinates(position.latitude, position.longitude)
             .then((placemarks) {
           // ignore: prefer_interpolation_to_compose_strings
-          String alamatLengkap = placemarks[0].name! +
-              ',' +
-              placemarks[0].street! +
+          String alamatLengkap = placemarks[0].street! +
               ',' +
               placemarks[0].locality! +
               ',' +

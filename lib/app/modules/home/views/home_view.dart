@@ -201,9 +201,7 @@ class HomeView extends GetView<HomeController> {
                                                     const SizedBox(height: 7),
                                                     //alamat
                                                     Text("Lokasi Anda"),
-                                                    SingleChildScrollView(
-                                                      controller:
-                                                          ScrollController(),
+                                                    Center(
                                                       child: Text(
                                                           "${controller.adressUser.value.toString().length > 50 ? controller.adressUser.value.toString().substring(0, 50) : controller.adressUser.value.toString()}"),
                                                     ),
@@ -299,14 +297,24 @@ class HomeView extends GetView<HomeController> {
                                                           if (controller
                                                               .isAbsenMasuk
                                                               .isFalse) {
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        const CaptureView(),
-                                                              ),
-                                                            );
+                                                            if (controller
+                                                                .isRadius
+                                                                .isTrue) {
+                                                              Get.toNamed(Routes
+                                                                  .PRESENSI);
+                                                            } else {
+                                                              showToast(
+                                                                  message:
+                                                                      "Anda Diluar Radius");
+                                                            }
+                                                            // Navigator.push(
+                                                            //   context,
+                                                            //   MaterialPageRoute(
+                                                            //     builder:
+                                                            //         (context) =>
+                                                            //             const CaptureView(),
+                                                            //   ),
+                                                            // );
                                                           } else {
                                                             showToast(
                                                                 message:
@@ -404,15 +412,25 @@ class HomeView extends GetView<HomeController> {
                                                               openAppSettings();
                                                               return;
                                                             }
+                                                            if (controller
+                                                                .isRadius
+                                                                .isTrue) {
+                                                              Get.toNamed(Routes
+                                                                  .PRESENSI);
+                                                            } else {
+                                                              showToast(
+                                                                  message:
+                                                                      "Anda Diluar Radius");
+                                                            }
 
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        const CaptureView(),
-                                                              ),
-                                                            );
+                                                            // Navigator.push(
+                                                            //   context,
+                                                            //   MaterialPageRoute(
+                                                            //     builder:
+                                                            //         (context) =>
+                                                            //             const CaptureView(),
+                                                            //   ),
+                                                            // );
                                                           },
                                                           style: ElevatedButton
                                                               .styleFrom(

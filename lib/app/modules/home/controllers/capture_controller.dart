@@ -151,6 +151,84 @@ class CaptureController extends GetxController {
     return '';
   }
 
+  Future<String> uploadPicture2(File file) async {
+    final homeC = Get.find<HomeController>();
+
+    if (file != null) {
+      logSys("Cek Proses Verifikasi Wajah");
+
+      try {
+        cekFoto('Proses Verifikasi Wajah');
+
+        // final data = await ServiceUpload().uploadFileAbsen(
+        //     filex: file.path,
+        //     id: homeC.dataUser.value.user!.id.toString(),
+        //     url: 'api/clockin');
+
+        final filePath = file.absolute.path;
+        final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+        final splitted = filePath.substring(0, (lastIndex));
+        final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+
+        var result = await FlutterImageCompress.compressAndGetFile(
+          file.absolute.path,
+          outPath,
+          quality: 30,
+        );
+
+        final filePath2 = homeC.filePathProfile.value;
+        final lastIndex2 = filePath2.lastIndexOf(new RegExp(r'.jp'));
+        final splitted2 = filePath2.substring(0, (lastIndex2));
+        final outPath2 = "${splitted2}_out${filePath2.substring(lastIndex2)}";
+
+        var result2 = await FlutterImageCompress.compressAndGetFile(
+          filePath2,
+          outPath2,
+          quality: 30,
+        );
+
+        final data = await ServiceFr().cekFace(
+            filex: result2!.path,
+            filex2: result!.path,
+            url: '${BASE_URL_FR}face_match');
+
+        logSysT(data.toString(), "cococot");
+
+        final a = jsonDecode(data);
+        logSysT(a['match'].toString(), "cococot2");
+
+        if (a['match'].toString() == 'false') {
+          Get.back();
+          Get.back();
+          showPopUpInfo(
+              success: false, title: 'Gagal', description: 'Foto Tidak Cocok');
+
+          logSys("erroror");
+          return "Gagal";
+        }
+
+        Get.back();
+        Get.back();
+        showPopUpInfo(
+            success: true,
+            title: 'Berhasil',
+            description: 'Foto Sesuai Berhasil Absen');
+
+        final data2 = await ServiceUpload().uploadFileAbsen(
+            filex: file.path,
+            id: homeC.dataUser.value.user!.id.toString(),
+            url: 'api/clockin');
+
+        homeC.getData(false);
+      } catch (e) {
+        showPopUpInfo(success: true, title: 'Gagal', description: 'Gagal ${e}');
+        Get.back();
+        logSys("erroror");
+      }
+    }
+    return '';
+  }
+
   void cekFoto(description) {
     bool success = true;
 
